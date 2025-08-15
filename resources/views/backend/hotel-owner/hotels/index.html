@@ -1,0 +1,412 @@
+create hotel mode code 
+
+
+
+<!-- Modal for viewing hotel details -->
+<div class="modal fade" id="hotelDetailModal" tabindex="-1" aria-labelledby="hotelDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hotelDetailModalLabel">Hotel Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="hotelDetailsContent">
+                    <div class="row">
+                        <div class="col-6">
+                          <p><strong>Name:</strong> <span id="hotelName"></span></p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Address:</strong> <span id="hotelAddress"></span></p>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                           <p><strong>City:</strong> <span id="hotelCity"></span></p>
+                        </div>
+                        <div class="col-6">
+                          <p><strong>Pincode:</strong> <span id="hotelPincode"></span></p>
+                        </div>
+                    </div>
+            
+                    {{-- <div class="row">
+                        <div class="col-6">
+                            <p><strong>Latitude:</strong> <span id="hotelLatitude"></span></p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Longitude:</strong> <span id="hotelLongitude"></span></p>
+                        </div>
+                    </div> --}}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Email:</strong> <span id="hotelEmail"></span></p>
+                        </div>
+                        <div class="col-6">
+                             <p><strong>Phone No:</strong> <span id="hotelPhone"></span></p>
+                        </div>
+                    </div>
+                    <br>
+                  
+                
+                    <div class="row">
+                        <div class="col-6">
+                    <p><strong>Telephone No:</strong> <span id="hotelTelephone"></span></p>
+
+                        </div>
+                        <div class="col-6">
+                    <p><strong>Star Category:</strong> <span id="hotelStarCategory"></span></p>
+
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                    <p><strong>Website:</strong> <span id="hotelWebsite"  style="white-space: pre-wrap;"></span></p>
+
+                        </div>
+                        <div class="col-6">
+                    <p><strong>Nearest Railway Station:</strong> <span id="hotelRailwayStation"></span></p>
+
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                    <p><strong>Nearest Airport:</strong> <span id="hotelAirport"></span></p>
+
+                        </div>
+                        <div class="col-6">
+                    <p><strong>Status:</strong> <span id="hotelStatus"></span></p>
+
+                        </div>
+                    </div>
+                    <br>
+                    <p><strong>Description:</strong> <span id="hotelDescription" style="white-space: pre-wrap;"></span></p>
+
+                    <div id="hotelImages" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ensure jQuery is included -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Ensure Bootstrap JS is included -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-slimscroll@1.3.8/jquery.slimscroll.min.js"></script>
+<script src="/admin/js/script.js"></script>
+<script>
+// Handle View Details Button
+
+$('.detail-btn').on('click', function() {
+    // Ensure this line is correctly assigning the hotel ID
+    var hotelId = $(this).data('id');  // Get hotel ID from data-id attribute of the clicked button
+    
+    if (hotelId) {
+        console.log('Hotel ID:', hotelId); // Debugging line to confirm the ID is retrieved
+
+        $.ajax({
+            url: '/owner/hotels/details/' + hotelId,  // Ensure the correct route is used
+            method: 'GET',
+            success: function(response) {
+                console.log(response);
+                // Populate the modal with hotel details
+                $('#hotelName').text(response.name);
+                $('#hotelAddress').text(response.address);
+                $('#hotelEmail').text(response.email);
+                $('#hotelPhone').text(response.	Phoneno);
+                $('#hotelCity').text(response.city);
+                $('#hotelPincode').text(response.pincode);
+                $('#hotelTelephone').text(response.telephoneno);
+                $('#hotelStarCategory').text(response.star_category);
+                $('#hotelWebsite').text(response.website);
+                $('#hotelRailwayStation').text(response.nearest_railwaystation);
+                $('#hotelAirport').text(response.nearest_airport);
+                $('#hotelStatus').text(response.status);
+                $('#hotelDescription').text(response.description);
+                 // Populate latitude and longitude
+                 $('#hotelLatitude').text(response.latitude); // Add this line
+                  $('#hotelLongitude').text(response.longitude); // Add this line
+
+
+                let imagesHtml = '';
+                response.images.forEach(image => {
+                    imagesHtml += `<img src="${image}" class="img-thumbnail" width="100"> `;
+                });
+                $('#hotelImages').html(imagesHtml);
+
+                // Open the modal
+                $('#hotelDetailModal').modal('show');
+            },
+            error: function(xhr) {
+                console.error("Error fetching hotel details:", xhr.responseText);
+            }
+        });
+    } else {
+        console.error('Hotel ID is not defined.');
+    }
+});
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+// In HotelController.php
+public function showDetails($id)
+{
+    // Retrieve the hotel using the provided ID
+    $hotel = Hotel::find($id);
+    // dd($hotel);
+
+    // Check if the hotel exists before calling methods on it
+    if (!$hotel) {
+        return response()->json(['message' => 'Hotel not found.'], 404);
+    }
+
+    // Assuming you want to get the images for the hotel:
+        $images = $hotel->getMedia('images')->map(function ($media) {
+            return $media->getUrl(); // or use other attributes like 'getFirstMediaUrl'
+        }); // Adjust this to your actual image relationship and field name
+
+
+        $map = json_decode($hotel->map, true); // Decode as an associative array
+
+        // Check if map data exists and retrieve latitude and longitude
+        $latitude = isset($map['latitude']) ? $map['latitude'] : null;
+        $longitude = isset($map['longitude']) ? $map['longitude'] : null;
+
+
+
+    // Return the hotel details as a response
+    return response()->json([
+        'name' => $hotel->name,
+        'address' => $hotel->address,
+        'email' => $hotel->email,
+        'phoneno' => $hotel->phoneno,
+        'city' => $hotel->city,
+        'pincode' => $hotel->pincode,
+        'telephone' => $hotel->telephone,
+        'star_category' => $hotel->star_category,
+        'website' => $hotel->website,
+        'nearest_railwaystation' => $hotel->nearest_railwaystation,
+        'nearest_airport' => $hotel->nearest_airport,
+        'status' => $hotel->status,
+        'description' => $hotel->description,
+       'images' => $images,
+       'latitude' => $latitude, // Return the latitude
+       'longitude' => $longitude // Return the longitude
+    ]);
+}
+
+
+
+
+
+Route::get('/hotels/details/{id}', [HotelsController::class, 'showDetails'])->name('owner.details');
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- @dd($hotel->rooms) --}}
+@foreach ($hotel->rooms as $room)
+
+    <tr>
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $room->room_no }}</td>
+        <td>{{ $room->roomType->name }}</td>
+        <td>${{ $room->price }}</td>
+        <td>{{ $room->bed_capacity }}</td>
+        <td>{{ $room->air_conditon }}</td>
+        <td>{{ ucfirst($room->status) }}</td>
+        <td>
+            @if($room->getMedia('room_images')->count())
+                @foreach($room->getMedia('room_images') as $image)
+                    <img src="{{ $image->getUrl('thumb') }}" width="50" height="50">
+                @endforeach
+            @else
+                No Image
+            @endif
+        </td>
+    </tr>
+@endforeach
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- <script>
+    $(document).ready(function() {
+        function fetchRooms() {
+            let priceRange = $('#price_range').val();
+            let minPrice = '', maxPrice = '';
+
+            if (priceRange) {
+                let prices = priceRange.split('-');
+                minPrice = prices[0];
+                maxPrice = prices[1];
+            }
+
+            $.ajax({
+                url: "{{ route('hotel.filter') }}",
+                type: "GET",
+                data: { min_price: minPrice, max_price: maxPrice },
+                success: function(response) {
+                    let roomList = $('#room-list');
+                    roomList.empty();
+
+                    if (response.length > 0) {
+                        response.forEach(room => {
+                            roomList.append(`<div class="col-md-3 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">Room ${room.room_no}</h5>
+                            <p class="card-text">
+                                <strong>Price:</strong> $${room.price} <br>
+                                <strong>Beds:</strong> ${room.bed_capacity || 'N/A'} <br>
+                                <strong>AC:</strong> ${room.air_condition || 'N/A'} <br>
+                            </p>
+                        </div>
+                    </div>
+                </div>`);
+                        });
+                    } else {
+                        roomList.append('<p>No rooms found in this price range.</p>');
+                    }
+                }
+            });
+        }
+
+        // Trigger AJAX when the dropdown selection changes
+        $('#price_range').on('change', function() {
+            fetchRooms();
+        });
+
+        // Load all rooms on page load
+        fetchRooms();
+    });
+</script> --}}
+
+{{-- <script>
+    $(document).ready(function() {
+        function fetchRooms() {
+            let priceRange = $('#price_range').val();
+            let minPrice = '', maxPrice = '';
+
+            if (priceRange) {
+                let prices = priceRange.split('-');
+                minPrice = prices[0];
+                maxPrice = prices[1];
+            }
+
+            $.ajax({
+                url: "{{ route('hotel.filter') }}",
+                type: "GET",
+                data: { min_price: minPrice, max_price: maxPrice },
+                success: function(response) {
+                    let roomList = $('#room-list');
+                    roomList.empty();
+
+                    if (response.length > 0) {
+                        response.forEach(room => {
+                            let imagesHtml = '';
+
+                            if (room.images.length > 0) {
+                                room.images.forEach((img, index) => {
+                                    imagesHtml += `
+                                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                            <img src="${img}" class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                        </div>`;
+                                });
+                            } else {
+                                imagesHtml = `
+                                    <div class="carousel-item active">
+                                        <img src="https://via.placeholder.com/200" class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                    </div>`;
+                            }
+
+                            let roomHtml = `
+                                <div class="col-md-3 mb-4">
+                                    <div class="card shadow">
+                                        <!-- Image Slider -->
+                                        <div id="carouselRoom${room.id}" class="carousel slide" data-bs-ride="carousel">
+                                            <div class="carousel-inner">
+                                                ${imagesHtml}
+                                            </div>
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom${room.id}" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom${room.id}" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Room Details -->
+                                        <div class="card-body">
+                                            <h5 class="card-title">Room ${room.room_no}</h5>
+                                            <p class="card-text">
+                                                <strong>Type:</strong> ${room.room_type} <br>
+                                                <strong>Price:</strong> $${room.price} <br>
+                                                <strong>Beds:</strong> ${room.bed_capacity || 'N/A'} <br>
+                                                <strong>AC:</strong> ${room.air_condition ? 'Yes' : 'No'} <br>
+                                                <strong>Status:</strong> 
+                                                <span class="badge bg-${room.status === 'available' ? 'success' : 'danger'}">
+                                                    ${room.status.charAt(0).toUpperCase() + room.status.slice(1)}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                            roomList.append(roomHtml);
+                        });
+                    } else {
+                        roomList.append('<p>No rooms found in this price range.</p>');
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText); // Debugging: Print any errors in the console
+                }
+            });
+        }
+
+        // Trigger AJAX when the dropdown selection changes
+        $('#price_range').on('change', function() {
+            fetchRooms();
+        });
+
+        // Load all rooms on page load
+        fetchRooms();
+    });
+</script> --}}
